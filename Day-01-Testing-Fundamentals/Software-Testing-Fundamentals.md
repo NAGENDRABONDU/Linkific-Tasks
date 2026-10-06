@@ -42,31 +42,41 @@ The tester should also check:
 
 ### Basic Testing Flow
 
-┌─────────────────┐
-│   Requirement   │
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│ Test Conditions │
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│ Test Execution  │
-└────────┬────────┘
-         ↓
-┌──────────────────────────┐
-│ Compare Expected & Actual│
-└────────────┬─────────────┘
-             ↓
-       ┌───────────┐
-       │ Pass / Fail│
-       └─────┬─────┘
-             ↓
-      ┌──────────────┐
-      │ Defect Found?│
-      └──────┬───────┘
-             ↓
-        Defect Report
+```text
++----------------+
+|  Requirement   |
++-------+--------+
+        |
+        v
++----------------+
+| Test Conditions|
++-------+--------+
+        |
+        v
++----------------+
+| Test Execution |
++-------+--------+
+        |
+        v
++---------------------------+
+| Compare Expected & Actual |
++------------+--------------+
+             |
+             v
+       +-----------+
+       | Pass/Fail |
+       +-----+-----+
+             |
+             v
+      +-------------+
+      | Defect Found|
+      +------+------+
+             |
+             v
+      +-------------+
+      |Defect Report|
+      +-------------+
+```
 
 ### Important Point
 
@@ -178,7 +188,7 @@ A failure occurs when the software behaves incorrectly during
 execution and does not produce the expected result.
 
 ### Relationship
-
+```text
 ┌──────────────┐
 │ Human Error  │
 │   (Mistake)  │
@@ -193,7 +203,7 @@ execution and does not produce the expected result.
 │   Failure    │
 │Wrong Behavior│
 └──────────────┘
-
+```
 ### Example
 
 Requirement:
@@ -222,19 +232,20 @@ specific condition that triggers it is executed.
 
 A test scenario is a high-level description of **what needs to be tested**.
 Diagram:
-
-             Test Scenario
-                  │
-            Verify Login
-                  │
-       ┌──────────┼──────────┐
-       ↓          ↓          ↓
-   Valid Login  Invalid    Empty Fields
-                Login
-       │          │          │
-       ↓          ↓          ↓
-   Test Case   Test Case   Test Case
-
+```text
+          Test Scenario
+               |
+        Verify Login
+               |
+      +--------+--------+
+      |        |        |
+      v        v        v
+   Valid    Invalid   Empty
+   Login     Login    Fields
+      |        |        |
+      v        v        v
+ Test Case Test Case Test Case
+```
 Example:
 
 > Verify login functionality.
