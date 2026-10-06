@@ -20,7 +20,7 @@ In an e-commerce application:
 Price = ₹100
 Quantity = 2
 Total = ₹200
-
+```
 The developer tests the price calculation method to check whether it gives ₹200.
 Remember
 Unit Testing → One small part
@@ -29,13 +29,14 @@ Unit Testing → One small part
 Definition
 Integration Testing means testing whether two or more modules work correctly together.
 Example
+```text
 In an e-commerce application:
 Product
    ↓
 Cart
    ↓
 Payment
-
+````
 We check:
 - Product is added to Cart.
 - Cart shows the correct product.
@@ -47,6 +48,7 @@ Integration Testing → Modules working together
 Definition
 System Testing means testing the complete application.
 Example
+```text
 For an e-commerce application:
 Login
   ↓
@@ -59,7 +61,7 @@ Checkout
 Payment
   ↓
 Order Confirmation
-
+```
 We test the complete application flow.
 Remember
 System Testing → Complete application
@@ -85,7 +87,7 @@ Integration Testing	Test modules together
 System Testing	Test the complete application
 Acceptance Testing	Check customer/business requirements
 
-
+```text
 Easy Flow
 Unit
  ↓
