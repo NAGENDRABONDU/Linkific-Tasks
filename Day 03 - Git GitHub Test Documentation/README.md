@@ -95,3 +95,7 @@ Test data is stored in the `test-data` folder.
 - Priority
 - Status
 - Screenshot
+
+## Collaboration Workflow
+
+Tester creates a feature branch → updates test cases → commits changes → pushes the branch → creates a Pull Request → review → merge into master.
