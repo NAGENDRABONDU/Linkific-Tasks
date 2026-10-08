@@ -94,4 +94,4 @@ Test data is stored in the `test-data` folder.
 - Severity
 - Priority
 - Status
-- Screenshot / Evidence
+- Screenshot
