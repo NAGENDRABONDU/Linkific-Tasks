@@ -1,0 +1,409 @@
+{
+  "info": {
+    "_postman_id": "9d9b4b13-7b0a-4c91-9d6b-2e93a94d0b71",
+    "name": "Day 7 - API Integration Testing Practice",
+    "description": "Practice collection for HTTP methods, response validation, JSON checks, and negative scenarios. Uses JSONPlaceholder public demo API; writes are simulated and are not persisted as a real database change.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://jsonplaceholder.typicode.com"
+    },
+    {
+      "key": "postId",
+      "value": "1"
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - GET all posts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts"
+          ]
+        },
+        "description": "Validate list endpoint and JSON response shape."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is JSON array', function () { pm.expect(pm.response.json()).to.be.an('array'); });",
+              "pm.test('Array has items', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - GET post by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}"
+          ]
+        },
+        "description": "Validate a specific resource."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Post has expected fields', function () { pm.expect(data).to.have.property('id'); pm.expect(data).to.have.property('title'); pm.expect(data).to.have.property('body'); });",
+              "pm.test('Post ID matches variable', function () { pm.expect(String(data.id)).to.eql(pm.variables.get('postId')); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - GET posts by user ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts?userId={{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts?userId={{userId}}"
+          ]
+        },
+        "description": "Validate query filtering."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Response is an array', function () { pm.expect(data).to.be.an('array'); });",
+              "pm.test('All posts belong to requested user', function () { pm.expect(data.every(p => String(p.userId) === pm.variables.get('userId'))).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - POST create post (simulated)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Day 7 integration practice\",\n  \"body\": \"Practice request for integration testing\",\n  \"userId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "JSONPlaceholder simulates create responses; it does not persist a real record."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+              "const data = pm.response.json();",
+              "pm.test('Response echoes submitted title', function () { pm.expect(data.title).to.eql('Day 7 integration practice'); });",
+              "pm.test('Response contains an ID', function () { pm.expect(data).to.have.property('id'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - PUT update post (simulated)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 1,\n  \"title\": \"Updated Day 7 practice post\",\n  \"body\": \"Updated content\",\n  \"userId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Update response is simulated by JSONPlaceholder; it does not persist."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Updated title is returned', function () { pm.expect(data.title).to.eql('Updated Day 7 practice post'); });",
+              "pm.test('Resource ID is returned', function () { pm.expect(String(data.id)).to.eql(pm.variables.get('postId')); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - PATCH update title (simulated)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Patched title for Day 7\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Partial update response is simulated."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Patched title is returned', function () { pm.expect(pm.response.json().title).to.eql('Patched title for Day 7'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - DELETE post (simulated)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}"
+          ]
+        },
+        "description": "Deletion response is simulated; no real persistent record is deleted."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is an object', function () { pm.expect(pm.response.json()).to.be.an('object'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - GET non-existent post",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts/99999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "99999999"
+          ]
+        },
+        "description": "JSONPlaceholder returns an empty object for unknown resource IDs; contract-specific APIs may return 404."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 404 or documented empty response', function () { pm.expect([404, 200]).to.include(pm.response.code); });",
+              "pm.test('No post data returned for missing ID', function () { const d = pm.response.json(); pm.expect(d).to.be.an('object'); pm.expect(Object.keys(d).length).to.eql(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - GET comments for post",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}/comments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}",
+            "comments"
+          ]
+        },
+        "description": "Validate nested related-resource endpoint."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Response is an array', function () { pm.expect(data).to.be.an('array'); });",
+              "pm.test('Comment records contain email', function () { if (data.length) pm.expect(data[0]).to.have.property('email'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - GET users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        },
+        "description": "Validate users endpoint and response schema."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Response is an array', function () { pm.expect(data).to.be.an('array'); });",
+              "pm.test('User object contains expected fields', function () { if (data.length) { pm.expect(data[0]).to.have.property('id'); pm.expect(data[0]).to.have.property('username'); pm.expect(data[0]).to.have.property('email'); } });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - GET albums for user",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/albums",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}",
+            "albums"
+          ]
+        },
+        "description": "Validate related resource and query mapping."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "const data = pm.response.json();",
+              "pm.test('Response is an array', function () { pm.expect(data).to.be.an('array'); });",
+              "pm.test('Returned albums belong to requested user', function () { pm.expect(data.every(a => String(a.userId) === pm.variables.get('userId'))).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
