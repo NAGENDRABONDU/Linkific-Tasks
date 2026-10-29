@@ -1,30 +1,20 @@
-# Day 13 — Advanced Selenium with Java, TestNG, Maven, and POM
+# Day 13: Advanced Selenium & Automation Frameworks
 
-## 1. Goal
+## Learning Objectives
 
-Build one maintainable automation framework for [SauceDemo](https://www.saucedemo.com/) using **Java + Selenium WebDriver + TestNG + Maven + Page Object Model (POM)**.
+- Handle complex Selenium scenarios.
+- Understand implicit, explicit, and fluent waits.
+- Implement the Page Object Model (POM).
+- Use TestNG annotations, assertions, data providers, suites, priorities, and parallel-execution settings.
+- Organize reusable automation code into a maintainable framework.
 
-This guide is written as a learning path: create the project structure first, then understand each part, and run the tests from Eclipse.
-
-## 2. Simple definitions
-
-- **Selenium WebDriver:** controls a real browser to automate actions such as typing, clicking, and reading page content.
-- **TestNG:** runs tests and provides annotations such as `@Test`, `@BeforeMethod`, and `@AfterMethod`.
-- **Maven:** downloads project dependencies and provides standard commands to build and run tests.
-- **Page Object Model (POM):** keeps page locators and page actions in page classes. Test classes describe what should be tested.
-- **Explicit wait:** waits until a specific condition is true, such as a button becoming clickable.
-- **BaseTest:** shared setup and cleanup code used by test classes.
-- **DataProvider:** runs the same test with multiple sets of input data.
-- **Parallel execution:** runs multiple tests at the same time. Start with sequential execution until the suite is stable.
-
-## 3. Project structure
-
-Create this structure in Eclipse. Keep the package names and file names consistent.
+## Project Folder Structure
 
 ```text
-Day13-SauceDemo-POM/
+Day13-Selenium-Framework/
 ├── pom.xml
 ├── testng.xml
+├── README.md
 └── src/
     └── test/
         ├── java/
@@ -32,14 +22,17 @@ Day13-SauceDemo-POM/
         │   │   └── BaseTest.java
         │   ├── pages/
         │   │   ├── LoginPage.java
+        │   │   ├── HomePage.java
         │   │   ├── InventoryPage.java
         │   │   ├── CartPage.java
-        │   │   └── CheckoutPage.java
+        │   │   ├── CheckoutPage.java
+        │   │   └── PracticePage.java
         │   ├── tests/
         │   │   ├── LoginTest.java
         │   │   ├── InventoryTest.java
         │   │   ├── CheckoutTest.java
-        │   │   └── TestNGFeaturesTest.java
+        │   │   ├── AdvancedInteractionsTest.java
+        │   │   └── DynamicElementsTest.java
         │   └── utilities/
         │       ├── WaitUtils.java
         │       └── ScreenshotUtils.java
@@ -47,192 +40,153 @@ Day13-SauceDemo-POM/
             └── config.properties
 ```
 
-### What belongs where?
+## 1. Selenium Waits
 
-| File/folder | Responsibility |
+### Implicit Wait
+A global wait applied when Selenium searches for elements. Avoid mixing implicit and explicit waits because timing can become unpredictable.
+
+```java
+driver.manage().timeouts().implicitlyWait(Duration.ZERO);
+```
+
+### Explicit Wait
+Waits for a specific condition, such as an element becoming visible or clickable.
+
+```java
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+WebElement button = wait.until(
+    ExpectedConditions.elementToBeClickable(By.id("login-button"))
+);
+button.click();
+```
+
+### Fluent Wait
+Allows a custom timeout, polling interval, and ignored exceptions.
+
+```java
+Wait<WebDriver> wait = new FluentWait<>(driver)
+    .withTimeout(Duration.ofSeconds(10))
+    .pollingEvery(Duration.ofMillis(300))
+    .ignoring(NoSuchElementException.class);
+```
+
+**Preferred approach:** use explicit waits for most UI interactions. Avoid `Thread.sleep()` because it waits for a fixed time even when the page is ready sooner.
+
+## 2. Complex Scenarios
+
+The project uses two practice websites because the SauceDemo shopping flow does not contain every advanced interaction.
+
+- SauceDemo: https://www.saucedemo.com/
+- The Internet: https://the-internet.herokuapp.com/
+
+| Scenario | Practice |
 |---|---|
-| `pom.xml` | Selenium, TestNG, and Maven configuration |
-| `testng.xml` | Chooses which TestNG tests to run |
-| `BaseTest.java` | Starts Chrome, opens the website, and closes the browser |
-| `pages/` | Locators and actions for each web page |
-| `tests/` | Test scenarios and assertions |
-| `WaitUtils.java` | Reusable explicit-wait methods |
-| `ScreenshotUtils.java` | Reusable screenshot helper |
-| `config.properties` | Website URL and other settings |
+| JavaScript alerts | Read alert text, accept, and dismiss |
+| Frames/iframes | Switch into a frame and return to default content |
+| Multiple windows | Store window handle, switch to the new window, then return |
+| Mouse hover | Use `Actions.moveToElement()` |
+| Drag and drop | Use `Actions.dragAndDrop()` |
+| Right-click | Use `Actions.contextClick()` |
+| Double-click | Use `Actions.doubleClick()` on a suitable element |
+| Keyboard actions | Use `Actions.sendKeys()` |
+| Dynamic elements | Wait for elements to appear or disappear |
+| Loading/AJAX | Wait for the required page condition instead of fixed delays |
 
-## 4. How POM works
+## 3. Page Object Model (POM)
+
+POM separates page locators and actions from test scenarios.
 
 ```text
 Test class
    |
    | calls page methods
    v
-Page Object class  ---- uses ----> WaitUtils
+Page Object class ---- uses ----> WaitUtils
    |
-   | finds and interacts with elements
+   | locates/interacts with elements
    v
-SauceDemo website
+Web application
 
-BaseTest sets up and closes WebDriver for each test.
+BaseTest manages WebDriver setup and cleanup.
 ```
 
-**Rule:** Put page locators and page actions in the relevant page class. Keep assertions and test intent in test classes as much as possible.
+### Page class responsibilities
 
-## 5. Setup in Eclipse
+- Store locators for one page.
+- Provide methods for page actions, such as `login()` or `addBackpackToCart()`.
+- Use explicit waits where needed.
+- Avoid putting unrelated test assertions inside page classes.
 
-1. Select **File → New → Maven Project**.
-2. Create a project with an example artifact ID such as `day13-saucedemo-pom`.
-3. Replace the generated `pom.xml` with the Maven configuration from the project package.
-4. Create the packages and Java files shown in the structure above.
-5. Put `config.properties` inside `src/test/resources`.
-6. Keep `testng.xml` at the project root.
-7. Right-click the project → **Maven → Update Project**.
-8. Confirm that Chrome is installed. The code uses `new ChromeDriver()` and Selenium Manager; no manually maintained `Drivers` folder is needed.
+### Test class responsibilities
 
-Example `config.properties`:
+- Call page methods.
+- Verify expected outcomes with TestNG assertions.
+- Keep each test focused on one scenario.
 
-```properties
-baseUrl=https://www.saucedemo.com/
-username=standard_user
-password=secret_sauce
-```
+## 4. TestNG Framework
 
-Use the matching property names in `BaseTest.java`.
+| Feature | Purpose |
+|---|---|
+| `@BeforeMethod` | Prepare a fresh browser before a test |
+| `@Test` | Mark a test method |
+| `@AfterMethod` | Clean up after a test |
+| `Assert` | Compare actual and expected results |
+| `@DataProvider` | Run a test with multiple input sets |
+| `testng.xml` | Select test classes and configure suite execution |
+| `priority` | Set a test ordering preference; tests should still be independent |
+| Parallel execution | Run tests concurrently after sequential execution is stable |
 
-## 6. The 11 learning tasks — one POM framework
+Start with `parallel="false"`. Enable parallel execution only when each test has its own WebDriver and independent data.
 
-| No. | Task | Where to implement it | Simple explanation |
-|---:|---|---|---|
-| 1 | Explicit waits | `WaitUtils.java`, page classes | Wait for elements to become visible or clickable instead of using fixed delays. |
-| 2 | Alerts | A separate practice site | SauceDemo's normal shopping flow does not provide a JavaScript alert scenario. |
-| 3 | Frames | A separate practice site | The normal SauceDemo flow does not contain an iframe exercise. |
-| 4 | Multiple windows | A separate practice site | The normal shopping flow does not require switching browser windows. |
-| 5 | Actions class | A separate practice site or suitable UI | Practice hover, right-click, or drag-and-drop on a page that supports them. |
-| 6 | Dynamic elements | `InventoryPage.java`, `CartPage.java` | Wait for product lists and cart counts to update, then verify the result. |
-| 7 | Page Object Model | All classes in `pages/` | Keep page locators/actions separate from test scenarios. |
-| 8 | Base test class | `BaseTest.java` | Reuse browser setup and teardown in every test class. |
-| 9 | TestNG features | `TestNGFeaturesTest.java`, test classes | Use annotations, assertions, and `@DataProvider`. |
-| 10 | Automation framework | Whole project | Connect configuration, page classes, utilities, tests, and Maven. |
-| 11 | Parallel execution | `testng.xml` and `BaseTest.java` | Try only after sequential tests are stable and every test has its own WebDriver. |
+## 5. Framework Components
 
-**Important:** These 11 topics belong to one learning plan, but not every topic can be demonstrated honestly on SauceDemo. Do not write fake alert/frame/window tests for elements that do not exist there.
+- **`BaseTest.java`** — shared WebDriver setup and teardown.
+- **`pages/`** — page locators and reusable page actions.
+- **`tests/`** — test scenarios and assertions.
+- **`WaitUtils.java`** — reusable explicit-wait helpers.
+- **`ScreenshotUtils.java`** — screenshot helper.
+- **`config.properties`** — base URLs and test configuration.
+- **`pom.xml`** — Selenium and TestNG dependencies.
+- **`testng.xml`** — TestNG suite configuration.
 
-## 7. SauceDemo test scenarios
+## 6. SauceDemo Test Scenarios
 
-Use the standard demo credentials shown on the website:
+Practice credentials: `standard_user` / `secret_sauce`.
 
-- Username: `standard_user`
-- Password: `secret_sauce`
+1. Verify valid login opens the inventory page.
+2. Verify invalid login displays an error.
+3. Sort product names alphabetically.
+4. Add a product to the cart and verify the cart badge.
+5. Verify the expected product is in the cart.
+6. Complete checkout with valid customer details.
+7. Verify the order confirmation.
+8. Use a TestNG `@DataProvider` for multiple login-data sets.
 
-Suggested scenarios:
+## 7. Run in Eclipse
 
-1. Valid login opens the inventory page.
-2. Invalid login shows an error.
-3. Product names can be sorted alphabetically.
-4. Adding the backpack updates the cart badge.
-5. The cart contains the product that was added.
-6. Checkout accepts valid first name, last name, and postal code.
-7. Finishing checkout displays the order confirmation.
-8. A `@DataProvider` supplies multiple login-data sets.
+1. Import the project using **File → Import → Existing Maven Projects**.
+2. Select the project directory.
+3. Right-click the project and select **Maven → Update Project**.
+4. Ensure Chrome is installed. `new ChromeDriver()` uses Selenium Manager; no manually maintained `Drivers` folder is required.
+5. Right-click `testng.xml` and choose **Run As → TestNG Suite**.
 
-Use assertions in every test. For example, verify the URL after login or verify the confirmation message after checkout. A test that only clicks buttons without checking the result is incomplete.
-
-## 8. Code pattern examples
-
-### A. Page Object constructor
-
-```java
-public class LoginPage {
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    public LoginPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    }
-}
-```
-
-**Meaning:** The test passes its current browser to the page object. The page object can then find elements in that browser.
-
-### B. Explicit wait
-
-```java
-WebElement loginButton = wait.until(
-    ExpectedConditions.elementToBeClickable(By.id("login-button"))
-);
-loginButton.click();
-```
-
-**Meaning:** Selenium waits up to 10 seconds for the login button to be clickable. It continues immediately if the condition becomes true.
-
-### C. TestNG test
-
-```java
-@Test
-public void validLoginOpensInventory() {
-    LoginPage loginPage = new LoginPage(driver);
-    loginPage.login("standard_user", "secret_sauce");
-
-    Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"));
-}
-```
-
-**Meaning:** Perform the login, then check the expected result with an assertion. In the full project, use the existing page methods and BaseTest setup rather than duplicating setup in each test.
-
-### D. DataProvider idea
-
-```java
-@DataProvider(name = "loginData")
-public Object[][] loginData() {
-    return new Object[][] {
-        {"standard_user", "secret_sauce"},
-        {"wrong_user", "wrong_password"}
-    };
-}
-```
-
-**Meaning:** TestNG can pass each row to a test method, allowing one test structure to be run with different inputs. Make the expected result explicit for each row.
-
-## 9. Run the project
-
-### In Eclipse
-
-1. Save all files.
-2. Right-click the project → **Maven → Update Project**.
-3. Right-click `testng.xml` → **Run As → TestNG Suite**.
-4. Review the TestNG results and the Console output.
-
-### From a terminal in the project folder
+Terminal alternative, from the project directory:
 
 ```bash
 mvn clean test
 ```
 
-This command asks Maven to clean previous build output and run the configured tests. It requires Maven to be installed and available on the system PATH.
+## Deliverables Checklist
 
-Start with `parallel="false"` in `testng.xml`. Do not increase parallel execution until the tests pass reliably one at a time.
+- [ ] Advanced Selenium scripts for waits and complex interactions.
+- [ ] POM implementation with separate page classes.
+- [ ] TestNG suite with annotations and assertions.
+- [ ] Data provider and suite configuration.
+- [ ] Reusable framework with BaseTest and utilities.
+- [ ] Configuration properties file.
+- [ ] `README.md` framework documentation.
+- [ ] `README.docx` framework documentation.
 
-## 10. Common problems
+## Notes
 
-- **ChromeDriver session error:** Update Chrome or allow Selenium Manager to resolve a compatible driver; avoid a manually pinned, outdated driver.
-- **Element not found:** Check the locator, current page, and whether the page has loaded. Add a condition-based explicit wait where needed.
-- **Test passes alone but fails in a suite:** Check shared browser state, test data, parallel settings, and timing. Give each test its own WebDriver.
-- **Maven dependencies missing:** Right-click project → Maven → Update Project.
-- **TestNG suite does not run:** Check that the class names in `testng.xml` exactly match the package and class names.
-
-## 11. Completion checklist
-
-- [ ] Maven project imports without dependency errors.
-- [ ] `BaseTest` opens and closes Chrome.
-- [ ] Page classes contain their own locators and actions.
-- [ ] Tests contain meaningful assertions.
-- [ ] Login, sorting, cart, and checkout scenarios are covered.
-- [ ] Tests pass sequentially before parallel execution is attempted.
-- [ ] Alerts, frames, windows, and advanced Actions are practiced on a site that actually supports those interactions.
-
-## Reference
-
-Sauce Labs' official Selenium demonstration documentation shows the basic SauceDemo login flow and emphasizes checking the expected result with assertions: [Selenium Demonstration Scripts](https://docs.saucelabs.com/web-apps/automated-testing/selenium/sample-scripts/).
-
-The framework files are a learning template. They have not been run in your local Eclipse environment, so run the suite and resolve any environment-specific issues before treating the results as verified.
+The test code is a learning template and must be run in the local environment before results are considered verified. Check locators and page behavior if the practice website changes.
