@@ -1,0 +1,36 @@
+﻿Test Case ID,Category,Scenario,Test Steps/Data,Expected Result,Type
+SEC001,Authentication,Valid login,Use valid test credentials,Login succeeds,Positive
+SEC002,Authentication,Invalid password,Use valid user and wrong password,Login is rejected with generic message,Negative
+SEC003,Authentication,Unknown username,Use unregistered username,Login is rejected without account enumeration,Negative
+SEC004,Authentication,Empty login fields,Submit blank username and password,Required validation appears,Negative
+SEC005,Authentication,Password masking,Type password,Password is masked by default,Positive
+SEC006,Authentication,Logout,Login then logout,Session is invalidated,Positive
+SEC007,Authentication,Password reset,Use controlled test account,Reset token is time-limited and single-use,Positive
+SEC008,Authorization,Protected page while logged out,Open protected URL without login,Access is denied or redirected,Negative
+SEC009,Authorization,Change user ID,Try another test user's record ID,Server denies unauthorized access,Negative
+SEC010,Authorization,Admin endpoint as normal user,Call admin-only function as normal user,Authorization is denied,Negative
+SEC011,Authorization,Read-only role update,Try update using read-only account,Server rejects update,Negative
+SEC012,Authorization,Direct object reference,Change an object ID to another user's test object,Only permitted objects are accessible,Negative
+SEC013,Input Validation,Overlong input,Submit a very long field value,Input is safely rejected or limited,Negative
+SEC014,Input Validation,Unexpected characters,Submit punctuation and Unicode,Input is handled safely,Positive
+SEC015,Input Validation,SQL injection handling,Use harmless quote-based test string in an authorized lab,Input treated as data; no database details exposed,Negative
+SEC016,Input Validation,Reflected XSS handling,Submit harmless HTML marker in authorized lab,Output encoded; no script executes,Negative
+SEC017,Input Validation,Stored XSS handling,Save harmless markup marker in test profile,Content encoded when displayed,Negative
+SEC018,Input Validation,Server-side validation,Send missing or invalid fields to test API,Server rejects invalid input safely,Negative
+SEC019,Session,Cookie security flags,Inspect cookies after login,"Appropriate Secure, HttpOnly and SameSite attributes",Positive
+SEC020,Session,Session rotation,Compare session identifier before and after login,Session ID is rotated where applicable,Positive
+SEC021,Session,Idle timeout,Wait for configured timeout then revisit protected page,Expired session is rejected,Positive
+SEC022,Session,Back button after logout,Logout then revisit protected page,Protected data is not accessible,Positive
+SEC023,CSRF,State-changing request protection,"In authorized lab, omit anti-CSRF control",Request rejected where CSRF protection is required,Negative
+SEC024,HTTPS,HTTP redirect,Visit HTTP version of application,Redirects to HTTPS or HTTP is disabled,Positive
+SEC025,HTTPS,Mixed content,Inspect HTTPS page network requests,Sensitive resources do not load over HTTP,Positive
+SEC026,Error Handling,Invalid resource ID,Request malformed or missing test ID,Controlled error without stack trace,Negative
+SEC027,Error Handling,Malformed JSON,Send malformed JSON to test API,Safe client error returned,Negative
+SEC028,Headers,Security headers,Inspect response headers,Applicable security headers are configured,Positive
+SEC029,Information Exposure,Inspect client responses,Review public HTML/JS/API responses,No secrets or unnecessary sensitive data exposed,Positive
+SEC030,Dependencies,Dependency review,Review dependency inventory or approved scan,Known vulnerable components identified,Positive
+SEC031,Logging,Failed login event,Perform controlled failed login,Event logged without password or token,Positive
+SEC032,SSRF,URL fetch feature,Use approved mock URL in a local lab,Unapproved destinations are blocked,Negative
+SEC033,File Upload,Disallowed file type,Upload harmless disallowed test file,Upload rejected or safely quarantined,Negative
+SEC034,Rate Limiting,Repeated login attempts,Use low rate against test account in lab,Throttling behaves according to policy,Positive
+SEC035,Data Protection,Sensitive data in transit,Inspect requests in authorized test environment,Sensitive data is sent only over protected transport,Positive
